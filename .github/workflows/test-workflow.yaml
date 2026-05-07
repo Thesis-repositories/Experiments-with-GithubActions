@@ -1,0 +1,41 @@
+name: test-workflow
+on: workflow_dispatch
+jobs:
+  find-runner:
+    runs-on: ubuntu-latest
+    outputs:
+      runner_label: ${{ steps.runner-label.outputs.runner_label }}
+    steps:
+      - name: Generate an access installation token
+        id: generate-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.API_AUTHENTICATION_APP_CLIENT_ID }}
+          private-key: ${{ secrets.API_AUTHENTICATION_APP_PRIVATE_KEY }}
+					
+      - name: Call to GitHub API
+        id: api-call
+        env:
+         GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          ACTIVE_RUNNERS=$( gh api \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2026-03-10" \
+           /orgs/Thesis-repositories/actions/runners --jq '[.runners[] | select(.status == "online" and .busy == false)] | length')
+           
+           echo "active_runners=$ACTIVE_RUNNERS" >> "$GITHUB_OUTPUT"
+      - name: Write runner-label
+        id: runner-label
+        run: |
+          if (( ${{ steps.api-call.outputs.active_runners }} > 0 ))
+          then
+            echo "runner_label=self-hosted" >> "$GITHUB_OUTPUT"
+          else
+            echo "runner_label=ubuntu-latest" >> "$GITHUB_OUTPUT"
+          fi
+  job1:
+    needs: find-runner
+    runs-on: ${{ needs.find-runner.outputs.runner_label }}
+    steps:
+      - name: True work
+        run: sleep 100
