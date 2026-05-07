@@ -12,7 +12,6 @@ jobs:
         with:
           client-id: ${{ vars.API_AUTHENTICATION_APP_CLIENT_ID }}
           private-key: ${{ secrets.API_AUTHENTICATION_APP_PRIVATE_KEY }}
-					
       - name: Call to GitHub API
         id: api-call
         env:
