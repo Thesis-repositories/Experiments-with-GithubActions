@@ -28,7 +28,7 @@ jobs:
         run: |
           if (( ${{ steps.api-call.outputs.active_runners }} > 0 ))
           then
-            echo "runner_label=self-hosted" >> "$GITHUB_OUTPUT"
+            echo "runner_label=self-hosted-runners" >> "$GITHUB_OUTPUT"
           else
             echo "runner_label=ubuntu-latest" >> "$GITHUB_OUTPUT"
           fi
